@@ -9,7 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app.config import get_settings
-from app.mcp_server import mcp
 
 log = structlog.get_logger()
 
@@ -63,8 +62,21 @@ def create_app() -> FastAPI:
             "app": "eGov Liwaza MCP Server",
             "version": "1.0.0",
             "docs": "/docs",
-            "mcp": "/mcp",
             "chat": "/api/chat",
+            "tools": "/api/tools",
+        }
+
+    @app.get("/api/tools", tags=["MCP"])
+    async def list_tools():
+        """Liste les outils MCP disponibles."""
+        return {
+            "tools": [
+                {"name": "outil_calcul_tva", "description": "Calcule la TVA (18%) en CI"},
+                {"name": "outil_cotisations_cnps", "description": "Calcule les cotisations CNPS 2024"},
+                {"name": "outil_verification_nif", "description": "Vérifie le format d'un NIF ivoirien"},
+                {"name": "outil_echeances_fiscales", "description": "Calendrier fiscal DGI CI"},
+                {"name": "outil_regime_fiscal", "description": "Infos sur les régimes MICRO/RSI/RNI"},
+            ]
         }
 
     @app.post("/api/chat", tags=["Chat"])
@@ -91,10 +103,6 @@ def create_app() -> FastAPI:
         except Exception as e:
             log.error("chat_error", error=str(e))
             raise HTTPException(status_code=500, detail=str(e))
-
-    # Monter le serveur MCP sur /mcp
-    mcp_app = mcp.get_asgi_app()
-    app.mount("/mcp", mcp_app)
 
     return app
 
