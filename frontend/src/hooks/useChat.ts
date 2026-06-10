@@ -1,39 +1,17 @@
 /**
- * Hook useChat — orchestre la conversation entre l'utilisateur, Claude et le MCP Server.
+ * Hook useChat — orchestre la conversation entre l'utilisateur et le backend.
  *
  * Flux :
  * 1. L'utilisateur envoie un message
- * 2. On envoie le message à Claude (API Anthropic) avec les outils MCP disponibles
- * 3. Si Claude veut appeler un outil → on appelle le MCP Server
- * 4. On renvoie le résultat à Claude → Claude formule la réponse finale
+ * 2. On envoie l'historique complet au backend (/api/chat)
+ * 3. Le backend appelle Gemini + exécute les outils MCP
+ * 4. On affiche la réponse avec les outils utilisés
  */
 
 import { useState, useCallback } from "react";
-import Anthropic from "@anthropic-ai/sdk";
 import { Message, ToolCall } from "../types";
-import { callMCPTool, MCP_TOOLS } from "../lib/mcpClient";
 
-const anthropic = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY ?? "",
-  dangerouslyAllowBrowser: true,
-});
-
-const SYSTEM_PROMPT = `Tu es un assistant fiscal ivoirien expert, intégré à la plateforme eGov CI.
-Tu aides les entreprises et les citoyens de Côte d'Ivoire à comprendre leurs obligations fiscales.
-
-Tes domaines d'expertise :
-- TVA (Taxe sur la Valeur Ajoutée) — taux 18% en CI
-- Cotisations CNPS (Caisse Nationale de Prévoyance Sociale)
-- Calendrier fiscal DGI (Direction Générale des Impôts)
-- Régimes fiscaux CI : Micro-entreprise, RSI, RNI
-- Validation des NIF (Numéro d'Identification Fiscale)
-
-Instructions :
-- Réponds en français par défaut. Si l'utilisateur écrit en anglais, réponds en anglais.
-- Utilise toujours les outils disponibles pour calculer des montants — ne calcule jamais de tête.
-- Présente les résultats de façon claire avec les montants en FCFA.
-- Si une question dépasse tes outils (ex: question juridique complexe), recommande de consulter un expert-comptable.
-- Sois précis, professionnel, et bienveillant.`;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8000";
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -54,104 +32,73 @@ export function useChat() {
       if (!userText.trim() || isLoading) return;
 
       setIsLoading(true);
-      addMessage({ role: "user", content: userText });
+      const newMessages = [...messages, {
+        id: crypto.randomUUID(),
+        role: "user" as const,
+        content: userText,
+        timestamp: new Date(),
+      }];
+      setMessages(newMessages);
 
       try {
-        // Construire l'historique pour Claude (format Anthropic)
-        const history = messages.map((m) => ({
-          role: m.role as "user" | "assistant",
+        // Construire l'historique au format attendu par le backend
+        const history = newMessages.map((m) => ({
+          role: m.role === "assistant" ? "model" : "user",
           content: m.content,
         }));
-        history.push({ role: "user", content: userText });
 
-        // Premier appel à Claude — avec les outils MCP disponibles
-        let response = await anthropic.messages.create({
-          model: "claude-sonnet-4-6",
-          max_tokens: 2048,
-          system: SYSTEM_PROMPT,
-          tools: MCP_TOOLS as unknown as Anthropic.Tool[],
-          messages: history,
+        const response = await fetch(`${BACKEND_URL}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history }),
         });
 
-        const toolCalls: ToolCall[] = [];
-
-        // Boucle d'orchestration — Claude peut appeler plusieurs outils
-        while (response.stop_reason === "tool_use") {
-          const toolUseBlocks = response.content.filter(
-            (b): b is Anthropic.ToolUseBlock => b.type === "tool_use"
-          );
-
-          const toolResults: Anthropic.ToolResultBlockParam[] = [];
-
-          for (const block of toolUseBlocks) {
-            const tc: ToolCall = {
-              id: block.id,
-              name: block.name,
-              input: block.input as Record<string, unknown>,
-              status: "pending",
-            };
-            toolCalls.push(tc);
-
-            try {
-              const output = await callMCPTool(
-                block.name,
-                block.input as Record<string, unknown>
-              );
-              tc.output = output;
-              tc.status = "success";
-              toolResults.push({
-                type: "tool_result",
-                tool_use_id: block.id,
-                content: JSON.stringify(output),
-              });
-            } catch (err) {
-              tc.status = "error";
-              tc.output = { error: String(err) };
-              toolResults.push({
-                type: "tool_result",
-                tool_use_id: block.id,
-                content: `Erreur: ${String(err)}`,
-                is_error: true,
-              });
-            }
-          }
-
-          // Renvoyer les résultats des outils à Claude
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          history.push({ role: "assistant", content: response.content as any });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          history.push({ role: "user", content: toolResults as any });
-
-          response = await anthropic.messages.create({
-            model: "claude-sonnet-4-6",
-            max_tokens: 2048,
-            system: SYSTEM_PROMPT,
-            tools: MCP_TOOLS as unknown as Anthropic.Tool[],
-            messages: history,
-          });
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({ detail: "Erreur serveur" }));
+          throw new Error(err.detail ?? `Erreur ${response.status}`);
         }
 
-        // Extraire la réponse textuelle finale
-        const textBlock = response.content.find(
-          (b): b is Anthropic.TextBlock => b.type === "text"
-        );
-        const assistantText = textBlock?.text ?? "Je n'ai pas pu générer une réponse.";
+        const data = await response.json();
 
-        addMessage({
-          role: "assistant",
-          content: assistantText,
-          toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
-        });
+        // Mapper les tool_calls du backend vers notre type ToolCall
+        const toolCalls: ToolCall[] = (data.tool_calls ?? []).map((tc: {
+          name: string;
+          input: Record<string, unknown>;
+          output: Record<string, unknown>;
+          status: string;
+        }) => ({
+          id: crypto.randomUUID(),
+          name: tc.name,
+          input: tc.input,
+          output: tc.output,
+          status: tc.status as "success" | "error" | "pending",
+        }));
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: data.content,
+            toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+            timestamp: new Date(),
+          },
+        ]);
       } catch (err) {
-        addMessage({
-          role: "assistant",
-          content: `Une erreur est survenue : ${String(err)}. Vérifiez votre clé API Anthropic.`,
-        });
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: `Une erreur est survenue : ${String(err)}. Vérifiez que le backend est démarré.`,
+            timestamp: new Date(),
+          },
+        ]);
       } finally {
         setIsLoading(false);
       }
     },
-    [messages, isLoading, addMessage]
+    [messages, isLoading]
   );
 
   const clearMessages = useCallback(() => setMessages([]), []);

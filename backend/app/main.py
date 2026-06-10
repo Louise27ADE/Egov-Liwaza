@@ -4,17 +4,23 @@ Point d'entrée principal — API FastAPI + MCP Server intégré.
 
 import structlog
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security.api_key import APIKeyHeader
-from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from app.config import get_settings
 from app.mcp_server import mcp
 
 log = structlog.get_logger()
 
-API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+class ChatMessage(BaseModel):
+    role: str   # "user" ou "model"
+    content: str
+
+
+class ChatRequest(BaseModel):
+    messages: list[ChatMessage]
 
 
 @asynccontextmanager
@@ -41,13 +47,12 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.origins_list,
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
 
-    # Health check — pas d'authentification requise
     @app.get("/health", tags=["System"])
     async def health():
         return {"status": "ok", "app": settings.app_name, "env": settings.app_env}
@@ -59,10 +64,35 @@ def create_app() -> FastAPI:
             "version": "1.0.0",
             "docs": "/docs",
             "mcp": "/mcp",
+            "chat": "/api/chat",
         }
 
+    @app.post("/api/chat", tags=["Chat"])
+    async def chat_endpoint(request: ChatRequest):
+        """
+        Endpoint principal de conversation.
+        Reçoit l'historique des messages, appelle Gemini,
+        exécute les outils MCP si nécessaire, et retourne la réponse.
+        """
+        if not settings.gemini_api_key:
+            raise HTTPException(
+                status_code=503,
+                detail="GEMINI_API_KEY non configurée sur le serveur."
+            )
+        try:
+            from app.services.chat_service import chat
+            # Convertir au format Gemini
+            gemini_messages = [
+                {"role": m.role, "parts": [m.content]}
+                for m in request.messages
+            ]
+            result = chat(gemini_messages)
+            return result
+        except Exception as e:
+            log.error("chat_error", error=str(e))
+            raise HTTPException(status_code=500, detail=str(e))
+
     # Monter le serveur MCP sur /mcp
-    # Le transport SSE permet au frontend React de communiquer en temps réel
     mcp_app = mcp.get_asgi_app()
     app.mount("/mcp", mcp_app)
 

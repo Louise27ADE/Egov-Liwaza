@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     debug: bool = True
     api_key: str = "dev-secret-key"
     anthropic_api_key: str = ""
+    gemini_api_key: str = ""
     allowed_origins: str = "http://localhost:3000,http://localhost:5173"
 
     @property
