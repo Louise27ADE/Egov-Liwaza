@@ -1,74 +1,103 @@
-/**
- * ToolCallCard — affiche l'exécution d'un outil MCP.
- * C'est la "visibilité de l'exécution des outils" demandée dans le test.
- * L'utilisateur peut voir exactement quel outil a été appelé, avec quels paramètres,
- * et quel résultat a été retourné.
- */
-
+import { useState } from "react";
 import { ToolCall } from "../types";
 
-const TOOL_LABELS: Record<string, string> = {
-  outil_calcul_tva: "Calcul TVA",
-  outil_cotisations_cnps: "Cotisations CNPS",
-  outil_verification_nif: "Vérification NIF",
-  outil_echeances_fiscales: "Échéances fiscales",
-  outil_regime_fiscal: "Régime fiscal",
+const TOOL_META: Record<string, { label: string; icon: string; color: string }> = {
+  outil_calcul_tva:         { label: "Calcul TVA",         icon: "🧮", color: "#E8630A" },
+  outil_cotisations_cnps:   { label: "Cotisations CNPS",   icon: "👥", color: "#009A44" },
+  outil_verification_nif:   { label: "Vérification NIF",   icon: "🔍", color: "#3B82F6" },
+  outil_echeances_fiscales: { label: "Échéances DGI",      icon: "📅", color: "#8B5CF6" },
+  outil_regime_fiscal:      { label: "Régime fiscal",      icon: "📋", color: "#F59E0B" },
 };
 
-const TOOL_ICONS: Record<string, string> = {
-  outil_calcul_tva: "🧮",
-  outil_cotisations_cnps: "👥",
-  outil_verification_nif: "🔍",
-  outil_echeances_fiscales: "📅",
-  outil_regime_fiscal: "📋",
-};
-
-interface Props {
-  toolCall: ToolCall;
+function formatValue(val: unknown): string {
+  if (typeof val === "number") return val.toLocaleString("fr-FR");
+  if (typeof val === "boolean") return val ? "Oui" : "Non";
+  if (val === null || val === undefined) return "—";
+  return String(val);
 }
 
-export function ToolCallCard({ toolCall }: Props) {
-  const label = TOOL_LABELS[toolCall.name] ?? toolCall.name;
-  const icon = TOOL_ICONS[toolCall.name] ?? "⚙️";
+export function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
+  const [open, setOpen] = useState(false);
+  const meta = TOOL_META[toolCall.name] ?? { label: toolCall.name, icon: "⚙️", color: "#4A5568" };
+  const isSuccess = toolCall.status === "success";
 
   return (
-    <div className="my-2 rounded-lg border border-slate-700 bg-slate-800/50 overflow-hidden text-sm">
-      {/* En-tête de l'outil */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-slate-800 border-b border-slate-700">
-        <span>{icon}</span>
-        <span className="font-medium text-slate-200">{label}</span>
+    <div
+      className="rounded-xl overflow-hidden border transition-all duration-200"
+      style={{ borderColor: open ? meta.color + "40" : "#1A2235", background: "#0F1623" }}
+    >
+      {/* En-tête cliquable */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/5 transition-colors"
+      >
         <span
-          className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
-            toolCall.status === "success"
-              ? "bg-green-900/60 text-green-400"
-              : toolCall.status === "error"
-              ? "bg-red-900/60 text-red-400"
-              : "bg-yellow-900/60 text-yellow-400"
-          }`}
+          className="w-6 h-6 rounded-md flex items-center justify-center text-xs flex-shrink-0"
+          style={{ background: meta.color + "20" }}
         >
-          {toolCall.status === "success"
-            ? "✓ Exécuté"
-            : toolCall.status === "error"
-            ? "✗ Erreur"
-            : "⏳ En cours"}
+          {meta.icon}
         </span>
-      </div>
+        <span className="text-xs font-medium flex-1" style={{ color: meta.color }}>
+          {meta.label}
+        </span>
+        <span
+          className="text-xs px-1.5 py-0.5 rounded-full font-medium"
+          style={{
+            background: isSuccess ? "#10B98120" : "#EF444420",
+            color: isSuccess ? "#10B981" : "#EF4444",
+          }}
+        >
+          {isSuccess ? "✓" : "✗"}
+        </span>
+        <svg
+          className="w-3 h-3 text-gray-600 transition-transform duration-200"
+          style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
 
-      {/* Paramètres d'entrée */}
-      <div className="px-3 py-2 border-b border-slate-700/50">
-        <p className="text-xs text-slate-500 mb-1">Paramètres</p>
-        <pre className="text-xs text-slate-300 font-mono overflow-x-auto">
-          {JSON.stringify(toolCall.input, null, 2)}
-        </pre>
-      </div>
+      {/* Détails dépliables */}
+      {open && (
+        <div className="border-t px-3 py-3 space-y-3" style={{ borderColor: "#1A2235" }}>
+          {/* Paramètres */}
+          <div>
+            <p className="text-xs font-medium mb-1.5" style={{ color: "#4A5568" }}>PARAMÈTRES</p>
+            <div className="space-y-1">
+              {Object.entries(toolCall.input).map(([k, v]) => (
+                <div key={k} className="flex items-center justify-between">
+                  <span className="text-xs" style={{ color: "#8A96B0" }}>{k}</span>
+                  <span className="text-xs font-medium" style={{ color: "#EEF0F6" }}>
+                    {formatValue(v)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
 
-      {/* Résultat */}
-      {toolCall.output && (
-        <div className="px-3 py-2">
-          <p className="text-xs text-slate-500 mb-1">Résultat</p>
-          <pre className="text-xs text-slate-300 font-mono overflow-x-auto">
-            {JSON.stringify(toolCall.output, null, 2)}
-          </pre>
+          {/* Résultat */}
+          {toolCall.output && (
+            <div>
+              <p className="text-xs font-medium mb-1.5" style={{ color: "#4A5568" }}>RÉSULTAT</p>
+              <div className="space-y-1">
+                {Object.entries(toolCall.output)
+                  .filter(([k]) => k !== "devise" && k !== "type_operation")
+                  .map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between">
+                      <span className="text-xs" style={{ color: "#8A96B0" }}>
+                        {k.replace(/_/g, " ")}
+                      </span>
+                      <span className="text-xs font-semibold" style={{ color: meta.color }}>
+                        {formatValue(v)}
+                        {typeof v === "number" && k.includes("montant") || k.includes("salaire") || k.includes("cotisation") || k.includes("part")
+                          ? " FCFA" : ""}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

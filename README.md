@@ -1,33 +1,33 @@
----
+﻿---
 title: Egov Liwaza Backend
-emoji: 🌍
+emoji: ðŸŒ
 colorFrom: green
 colorTo: orange
 sdk: docker
 pinned: false
 ---
 
-# eGov CI — Plateforme Fiscale Intelligente
+# eGov CI â€” Plateforme Fiscale Intelligente
 
-> Plateforme eGov alimentée par l'IA, permettant aux entreprises et citoyens de Côte d'Ivoire d'interagir avec les services fiscaux en langage naturel.
+> Plateforme eGov alimentÃ©e par l'IA, permettant aux entreprises et citoyens de CÃ´te d'Ivoire d'interagir avec les services fiscaux en langage naturel.
 
 **Auteure :** Louise ADEDOKUN  
-**Stack :** Python · FastAPI · MCP · React · TypeScript · Tailwind · Claude claude-sonnet-4-6  
-**Déploiement :** HuggingFace Spaces (backend) · Vercel (frontend)
+**Stack :** Python Â· FastAPI Â· MCP Â· React Â· TypeScript Â· Tailwind Â· Google Gemini 2.5 Flash Lite  
+**DÃ©ploiement :** HuggingFace Spaces (backend) Â· Vercel (frontend)
 
 ---
 
-## Aperçu du produit
+## AperÃ§u du produit
 
-L'utilisateur pose une question en français ou en anglais :
+L'utilisateur pose une question en franÃ§ais ou en anglais :
 
 > *"Calcule la TVA sur 500 000 FCFA pour une vente"*
 
 L'assistant :
-1. Comprend la requête grâce à Claude
-2. Identifie l'outil MCP approprié (`outil_calcul_tva`)
-3. Exécute l'outil sur le MCP Server (backend Python)
-4. Retourne un résultat structuré et clair
+1. Comprend la requÃªte grÃ¢ce Ã  Claude
+2. Identifie l'outil MCP appropriÃ© (`outil_calcul_tva`)
+3. ExÃ©cute l'outil sur le MCP Server (backend Python)
+4. Retourne un rÃ©sultat structurÃ© et clair
 
 ---
 
@@ -35,32 +35,32 @@ L'assistant :
 
 ```
 Utilisateur
-    │
-    ▼
+    â”‚
+    â–¼
 React Frontend (MCP Client)
-    │  Claude claude-sonnet-4-6 (Anthropic API)
-    │  Tool use → appels MCP
-    │
-    ▼
+    â”‚  Google Gemini 2.5 Flash Lite (Anthropic API)
+    â”‚  Tool use â†’ appels MCP
+    â”‚
+    â–¼
 Python MCP Server (FastAPI)
-    │
-    ├── outil_calcul_tva          → Calcul TVA 18% CI
-    ├── outil_cotisations_cnps    → Barème CNPS 2024
-    ├── outil_verification_nif    → Validation NIF DGI
-    ├── outil_echeances_fiscales  → Calendrier fiscal DGI
-    └── outil_regime_fiscal       → Régimes MICRO/RSI/RNI
+    â”‚
+    â”œâ”€â”€ outil_calcul_tva          â†’ Calcul TVA 18% CI
+    â”œâ”€â”€ outil_cotisations_cnps    â†’ BarÃ¨me CNPS 2024
+    â”œâ”€â”€ outil_verification_nif    â†’ Validation NIF DGI
+    â”œâ”€â”€ outil_echeances_fiscales  â†’ Calendrier fiscal DGI
+    â””â”€â”€ outil_regime_fiscal       â†’ RÃ©gimes MICRO/RSI/RNI
 ```
 
 ---
 
 ## Installation locale
 
-### Prérequis
+### PrÃ©requis
 - Python 3.12+
 - Node.js 20+
-- Une clé API Anthropic (https://console.anthropic.com)
+- Une clÃ© API Anthropic (https://console.anthropic.com)
 
-### 1. Cloner le dépôt
+### 1. Cloner le dÃ©pÃ´t
 ```bash
 git clone https://github.com/VOTRE_USERNAME/egov-liwaza.git
 cd egov-liwaza
@@ -70,7 +70,7 @@ cd egov-liwaza
 ```bash
 cd backend
 cp .env.example .env
-# Éditez .env et ajoutez votre ANTHROPIC_API_KEY
+# Ã‰ditez .env et ajoutez votre ANTHROPIC_API_KEY
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
@@ -79,17 +79,17 @@ uvicorn app.main:app --reload --port 8000
 ```bash
 cd frontend
 cp ../.env.example .env.local
-# Éditez .env.local et ajoutez votre VITE_ANTHROPIC_API_KEY
+# Ã‰ditez .env.local et ajoutez votre VITE_ANTHROPIC_API_KEY
 npm install
 npm run dev
 ```
 
 Ouvrez http://localhost:3000
 
-### Avec Docker (option recommandée)
+### Avec Docker (option recommandÃ©e)
 ```bash
 cp .env.example .env
-# Éditez .env
+# Ã‰ditez .env
 docker-compose up --build
 ```
 
@@ -100,7 +100,7 @@ docker-compose up --build
 ```bash
 cd backend
 python -m pytest tests/ -v
-# → 19 tests passent
+# â†’ 19 tests passent
 ```
 
 ---
@@ -108,84 +108,85 @@ python -m pytest tests/ -v
 ## Structure du projet
 
 ```
-egov-liwaza/                    ← Monorepo
-├── backend/
-│   ├── app/
-│   │   ├── main.py             ← Point d'entrée FastAPI
-│   │   ├── mcp_server.py       ← Serveur MCP (5 outils)
-│   │   ├── config.py           ← Configuration Pydantic
-│   │   ├── models/fiscal.py    ← Modèles de données
-│   │   └── tools/fiscal_tools.py ← Logique métier fiscale
-│   ├── tests/                  ← Tests pytest (19 tests)
-│   ├── Dockerfile
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx             ← Application principale
-│   │   ├── hooks/useChat.ts    ← Orchestration Claude + MCP
-│   │   ├── lib/mcpClient.ts    ← Client MCP
-│   │   └── components/         ← UI components
-│   ├── Dockerfile
-│   └── package.json
-├── docs/
-│   ├── ARCHITECTURE.md
-│   └── AI_STRATEGY.md
-├── .github/workflows/ci.yml    ← CI/CD GitHub Actions
-└── docker-compose.yml
+egov-liwaza/                    â† Monorepo
+â”œâ”€â”€ backend/
+â”‚   â”œâ”€â”€ app/
+â”‚   â”‚   â”œâ”€â”€ main.py             â† Point d'entrÃ©e FastAPI
+â”‚   â”‚   â”œâ”€â”€ mcp_server.py       â† Serveur MCP (5 outils)
+â”‚   â”‚   â”œâ”€â”€ config.py           â† Configuration Pydantic
+â”‚   â”‚   â”œâ”€â”€ models/fiscal.py    â† ModÃ¨les de donnÃ©es
+â”‚   â”‚   â””â”€â”€ tools/fiscal_tools.py â† Logique mÃ©tier fiscale
+â”‚   â”œâ”€â”€ tests/                  â† Tests pytest (19 tests)
+â”‚   â”œâ”€â”€ Dockerfile
+â”‚   â””â”€â”€ requirements.txt
+â”œâ”€â”€ frontend/
+â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”œâ”€â”€ App.tsx             â† Application principale
+â”‚   â”‚   â”œâ”€â”€ hooks/useChat.ts    â† Orchestration Claude + MCP
+â”‚   â”‚   â”œâ”€â”€ lib/mcpClient.ts    â† Client MCP
+â”‚   â”‚   â””â”€â”€ components/         â† UI components
+â”‚   â”œâ”€â”€ Dockerfile
+â”‚   â””â”€â”€ package.json
+â”œâ”€â”€ docs/
+â”‚   â”œâ”€â”€ ARCHITECTURE.md
+â”‚   â””â”€â”€ AI_STRATEGY.md
+â”œâ”€â”€ .github/workflows/ci.yml    â† CI/CD GitHub Actions
+â””â”€â”€ docker-compose.yml
 ```
 
 ---
 
 ## Endpoints API
 
-| Méthode | URL | Description |
+| MÃ©thode | URL | Description |
 |---------|-----|-------------|
-| GET | `/health` | État du serveur |
+| GET | `/health` | Ã‰tat du serveur |
 | GET | `/docs` | Documentation Swagger |
 | `*` | `/mcp/*` | Protocole MCP (SSE) |
 
 ---
 
-## Déploiement
+## DÃ©ploiement
 
-### Backend — Render
-1. Connecter le repo GitHub à Render
-2. Créer un "Web Service" → pointer vers `backend/`
+### Backend â€” Render
+1. Connecter le repo GitHub Ã  Render
+2. CrÃ©er un "Web Service" â†’ pointer vers `backend/`
 3. Build command : `pip install -r requirements.txt`
 4. Start command : `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 5. Ajouter les variables d'environnement dans le dashboard Render
 
-### Frontend — Vercel
-1. Connecter le repo GitHub à Vercel
+### Frontend â€” Vercel
+1. Connecter le repo GitHub Ã  Vercel
 2. Root directory : `frontend`
 3. Build command : `npm run build`
 4. Ajouter `VITE_ANTHROPIC_API_KEY` et `VITE_MCP_URL` dans les settings Vercel
 
 ---
 
-## Hypothèses et compromis
+## HypothÃ¨ses et compromis
 
-**Hypothèses :**
-- Les données fiscales (taux TVA 18%, barèmes CNPS) sont stables sur la durée du test
-- Le NIF ivoirien suit un format standardisé DGI
+**HypothÃ¨ses :**
+- Les donnÃ©es fiscales (taux TVA 18%, barÃ¨mes CNPS) sont stables sur la durÃ©e du test
+- Le NIF ivoirien suit un format standardisÃ© DGI
 
 **Compromis :**
-- La clé Anthropic est utilisée côté frontend (dangerouslyAllowBrowser) pour la simplicité du démo — en production, il faudrait un proxy backend
-- Pas de persistance des conversations (localStorage possible comme amélioration)
+- La clÃ© Anthropic est utilisÃ©e cÃ´tÃ© frontend (dangerouslyAllowBrowser) pour la simplicitÃ© du dÃ©mo â€” en production, il faudrait un proxy backend
+- Pas de persistance des conversations (localStorage possible comme amÃ©lioration)
 
-**Améliorations futures :**
+**AmÃ©liorations futures :**
 - Authentification utilisateurs (OAuth2)
-- Persistance conversations en base de données
-- Intégration directe API DGI quand disponible
-- Mode hors-ligne avec cache des données fiscales
+- Persistance conversations en base de donnÃ©es
+- IntÃ©gration directe API DGI quand disponible
+- Mode hors-ligne avec cache des donnÃ©es fiscales
 
 ---
 
-## Outils AI utilisés
+## Outils AI utilisÃ©s
 
-- **Claude** (Anthropic) — génération de code, revue, documentation
-- **Prompts utilisés** : disponibles dans `docs/AI_USAGE.md`
+- **Claude** (Anthropic) â€” gÃ©nÃ©ration de code, revue, documentation
+- **Prompts utilisÃ©s** : disponibles dans `docs/AI_USAGE.md`
 
 ---
 
-*Construit pour le test technique LIWAZA — juin 2025*
+*Construit pour le test technique LIWAZA â€” juin 2025*
+
