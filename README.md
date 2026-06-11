@@ -13,7 +13,7 @@ pinned: false
 
 **Auteure :** Louise ADEDOKUN  
 **Stack :** Python · FastAPI · MCP · React · TypeScript · Tailwind · Claude claude-sonnet-4-6  
-**Déploiement :** Render (backend) · Vercel (frontend)
+**Déploiement :** HuggingFace Spaces (backend) · Vercel (frontend)
 
 ---
 
