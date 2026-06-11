@@ -39,11 +39,11 @@ export default function App() {
         style={{ borderBottom: "1px solid var(--color-border)" }}
       >
         <div className="flex items-center gap-3">
-          {/* CI tricolor mark */}
-          <div style={{ display: "flex", gap: 3, alignItems: "center" }}>
-            <div style={{ width: 4, height: 18, borderRadius: 2, background: "#D9580A" }} />
-            <div style={{ width: 4, height: 18, borderRadius: 2, background: "#E8E6DC" }} />
-            <div style={{ width: 4, height: 18, borderRadius: 2, background: "#0A8A3C" }} />
+          {/* CI flag */}
+          <div style={{ width: 28, height: 20, borderRadius: 4, overflow: "hidden", display: "flex", flexShrink: 0, boxShadow: "0 1px 4px #00000040" }}>
+            <div style={{ flex: 1, background: "#D9580A" }} />
+            <div style={{ flex: 1, background: "#F0EFE9" }} />
+            <div style={{ flex: 1, background: "#0A8A3C" }} />
           </div>
           <div>
             <span className="text-sm font-semibold" style={{ color: "var(--color-txt-1)" }}>
@@ -94,11 +94,11 @@ export default function App() {
 function WelcomeScreen({ onSelect }: { onSelect: (q: string) => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-full px-4 py-16">
-      {/* Mark */}
-      <div className="flex items-center gap-1.5 mb-8">
-        <div style={{ width: 6, height: 28, borderRadius: 3, background: "#D9580A" }} />
-        <div style={{ width: 6, height: 28, borderRadius: 3, background: "#E8E6DC" }} />
-        <div style={{ width: 6, height: 28, borderRadius: 3, background: "#0A8A3C" }} />
+      {/* CI flag */}
+      <div style={{ width: 48, height: 34, borderRadius: 8, overflow: "hidden", display: "flex", flexShrink: 0, boxShadow: "0 2px 12px #00000050", marginBottom: 28 }}>
+        <div style={{ flex: 1, background: "#D9580A" }} />
+        <div style={{ flex: 1, background: "#F0EFE9" }} />
+        <div style={{ flex: 1, background: "#0A8A3C" }} />
       </div>
 
       <h1

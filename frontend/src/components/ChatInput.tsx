@@ -29,14 +29,15 @@ export function ChatInput({ onSend, disabled }: Props) {
 
   return (
     <div
-      className="flex-shrink-0 px-4 py-3"
-      style={{ background: "var(--color-surface)", borderTop: "1px solid var(--color-border)" }}
+      className="flex-shrink-0 px-4 pb-4 pt-3"
+      style={{ background: "var(--color-bg)" }}
     >
       <div
-        className="max-w-2xl mx-auto flex items-end gap-2 rounded-xl px-3.5 py-2.5"
+        className="max-w-2xl mx-auto rounded-2xl"
         style={{
           background: "var(--color-surface-2)",
           border: "1px solid var(--color-border-2)",
+          boxShadow: "0 4px 24px #00000030",
         }}
       >
         <textarea
@@ -47,34 +48,38 @@ export function ChatInput({ onSend, disabled }: Props) {
           onInput={onInput}
           placeholder="Posez votre question fiscale…"
           disabled={disabled}
-          rows={1}
-          className="flex-1 bg-transparent text-sm outline-none resize-none leading-relaxed"
+          rows={2}
+          className="w-full bg-transparent text-sm outline-none resize-none leading-relaxed px-4 pt-4 pb-2"
           style={{
             color: "var(--color-txt-1)",
-            maxHeight: "140px",
+            minHeight: 60,
+            maxHeight: 180,
             caretColor: "var(--color-orange)",
+            display: "block",
           }}
         />
-
-        <button
-          onClick={send}
-          disabled={!canSend}
-          className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150"
-          style={{
-            background: canSend ? "var(--color-orange)" : "var(--color-surface-3)",
-            cursor: canSend ? "pointer" : "not-allowed",
-          }}
-        >
-          {disabled
-            ? <Loader2 size={14} style={{ color: "var(--color-txt-3)" }} className="animate-spin" />
-            : <SendHorizonal size={14} style={{ color: canSend ? "#fff" : "var(--color-txt-3)" }} strokeWidth={2} />
-          }
-        </button>
+        <div className="flex items-center justify-between px-3 pb-3">
+          <span className="text-xs" style={{ color: "var(--color-txt-3)" }}>
+            Entrée pour envoyer · Maj+Entrée pour nouvelle ligne
+          </span>
+          <button
+            onClick={send}
+            disabled={!canSend}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150"
+            style={{
+              background: canSend ? "var(--color-orange)" : "var(--color-surface-3)",
+              color: canSend ? "#fff" : "var(--color-txt-3)",
+              cursor: canSend ? "pointer" : "not-allowed",
+            }}
+          >
+            {disabled
+              ? <Loader2 size={13} className="animate-spin" />
+              : <SendHorizonal size={13} strokeWidth={2} />
+            }
+            Envoyer
+          </button>
+        </div>
       </div>
-
-      <p className="text-center mt-1.5 text-xs" style={{ color: "var(--color-txt-3)" }}>
-        Entrée pour envoyer · Maj+Entrée pour nouvelle ligne
-      </p>
     </div>
   );
 }
