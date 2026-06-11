@@ -28,16 +28,12 @@ export function ChatInput({ onSend, disabled }: Props) {
   const canSend = !disabled && value.trim().length > 0;
 
   return (
-    <div
-      className="flex-shrink-0 px-4 sm:px-6 pb-5 pt-3"
-      style={{ background: "var(--color-bg)" }}
-    >
+    <div className="flex-shrink-0 px-4 sm:px-6 pb-4 pt-2" style={{ background: "var(--color-bg)" }}>
       <div
-        className="w-full flex items-center gap-3 rounded-xl px-4 py-3"
+        className="w-full flex items-center gap-2 rounded-lg px-3 py-2"
         style={{
           background: "var(--color-surface-2)",
           border: "1px solid var(--color-border-2)",
-          boxShadow: "0 2px 16px #00000025",
         }}
       >
         <textarea
@@ -49,28 +45,30 @@ export function ChatInput({ onSend, disabled }: Props) {
           placeholder="Posez votre question fiscale…"
           disabled={disabled}
           rows={1}
-          className="flex-1 bg-transparent text-sm outline-none resize-none leading-relaxed"
+          className="flex-1 bg-transparent outline-none resize-none"
           style={{
             color: "var(--color-txt-1)",
+            fontSize: "0.875rem",
+            lineHeight: "1.5rem",
             maxHeight: 160,
             caretColor: "var(--color-orange)",
+            paddingTop: 0,
+            paddingBottom: 0,
           }}
         />
         <button
           onClick={send}
           disabled={!canSend}
-          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150"
+          className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center transition-all duration-150"
           style={{
-            background: canSend ? "var(--color-orange)" : "var(--color-surface-3)",
-            color: canSend ? "#fff" : "var(--color-txt-3)",
+            background: canSend ? "var(--color-orange)" : "transparent",
             cursor: canSend ? "pointer" : "not-allowed",
           }}
         >
           {disabled
-            ? <Loader2 size={13} className="animate-spin" />
-            : <SendHorizonal size={13} strokeWidth={2} />
+            ? <Loader2 size={13} style={{ color: "var(--color-txt-3)" }} className="animate-spin" />
+            : <SendHorizonal size={13} style={{ color: canSend ? "#fff" : "var(--color-txt-3)" }} strokeWidth={2} />
           }
-          Envoyer
         </button>
       </div>
     </div>
