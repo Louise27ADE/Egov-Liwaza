@@ -59,9 +59,7 @@ export function ChatInput({ onSend, disabled }: Props) {
           }}
         />
         <div className="flex items-center justify-between px-3 pb-3">
-          <span className="text-xs" style={{ color: "var(--color-txt-3)" }}>
-            Entrée pour envoyer · Maj+Entrée pour nouvelle ligne
-          </span>
+          <span />
           <button
             onClick={send}
             disabled={!canSend}
