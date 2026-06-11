@@ -1,3 +1,13 @@
+---
+title: Egov Liwaza Backend
+emoji: 🏛️
+colorFrom: green
+colorTo: orange
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
 # eGov CI — Plateforme Fiscale Intelligente
 
 > Plateforme eGov alimentée par l'IA, permettant aux entreprises et citoyens de Côte d'Ivoire d'interagir avec les services fiscaux en langage naturel.
