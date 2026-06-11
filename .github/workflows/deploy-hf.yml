@@ -3,9 +3,6 @@ name: Deploy to HuggingFace Spaces
 on:
   push:
     branches: [main]
-    paths:
-      - 'backend/**'
-      - 'Dockerfile'
 
 jobs:
   deploy:
