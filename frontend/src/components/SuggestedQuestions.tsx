@@ -1,52 +1,75 @@
+import { Calculator, Calendar, Users, Search, FileText, Briefcase } from "lucide-react";
+
 interface Props { onSelect: (q: string) => void }
 
 const SUGGESTIONS = [
-  { emoji: "🧮", cat: "TVA",       text: "Calcule la TVA sur 500 000 FCFA",                          color: "#E8630A" },
-  { emoji: "📅", cat: "Calendrier", text: "Quelles sont les échéances fiscales de juin 2025 ?",        color: "#8B5CF6" },
-  { emoji: "👥", cat: "CNPS",       text: "Calcule les cotisations CNPS pour 3 employés à 250 000 FCFA", color: "#009A44" },
-  { emoji: "🔍", cat: "NIF",        text: "Vérifie si le NIF A1234567B est valide",                   color: "#3B82F6" },
-  { emoji: "📋", cat: "Régimes",    text: "Explique-moi le régime RSI",                               color: "#F59E0B" },
-  { emoji: "💼", cat: "Conseil",    text: "Mon CA est de 80 millions FCFA, quel régime fiscal ?",     color: "#EC4899" },
+  {
+    Icon: Calculator, color: "#D9580A", cat: "TVA",
+    text: "Calcule la TVA sur 500 000 FCFA",
+  },
+  {
+    Icon: Calendar, color: "#7C3AED", cat: "Calendrier DGI",
+    text: "Quelles sont les échéances fiscales de juin 2025 ?",
+  },
+  {
+    Icon: Users, color: "#0A8A3C", cat: "CNPS",
+    text: "Cotisations CNPS pour 3 employés à 250 000 FCFA",
+  },
+  {
+    Icon: Search, color: "#2563EB", cat: "NIF",
+    text: "Vérifie si le NIF A1234567B est valide",
+  },
+  {
+    Icon: FileText, color: "#D97706", cat: "Régimes",
+    text: "Explique le régime simplifié d'imposition RSI",
+  },
+  {
+    Icon: Briefcase, color: "#6366F1", cat: "Conseil",
+    text: "CA de 80 M FCFA — quel régime fiscal choisir ?",
+  },
 ];
 
 export function SuggestedQuestions({ onSelect }: Props) {
   return (
-    <div className="w-full max-w-2xl mx-auto px-4">
-      <p className="text-xs font-medium text-center mb-4" style={{ color: "#4A5568", letterSpacing: "0.08em" }}>
+    <div className="w-full max-w-xl mx-auto px-4">
+      <p
+        className="text-xs font-semibold text-center mb-3"
+        style={{ color: "var(--color-txt-3)", letterSpacing: "0.07em" }}
+      >
         QUESTIONS FRÉQUENTES
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {SUGGESTIONS.map((s) => (
+        {SUGGESTIONS.map(({ Icon, color, cat, text }) => (
           <button
-            key={s.text}
-            onClick={() => onSelect(s.text)}
-            className="group text-left px-4 py-3 rounded-xl border transition-all duration-200 hover:scale-[1.01]"
+            key={text}
+            onClick={() => onSelect(text)}
+            className="group text-left rounded-xl px-3.5 py-3 transition-all duration-150"
             style={{
-              background: "#0F1623",
-              borderColor: "#1A2235",
+              background: "var(--color-surface-2)",
+              border: "1px solid var(--color-border)",
             }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = s.color + "50";
-              (e.currentTarget as HTMLElement).style.background = s.color + "08";
+              (e.currentTarget as HTMLElement).style.borderColor = color + "45";
+              (e.currentTarget as HTMLElement).style.background = color + "08";
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = "#1A2235";
-              (e.currentTarget as HTMLElement).style.background = "#0F1623";
+              (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
+              (e.currentTarget as HTMLElement).style.background = "var(--color-surface-2)";
             }}
           >
             <div className="flex items-start gap-3">
-              <span
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0"
-                style={{ background: s.color + "15" }}
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                style={{ background: color + "18" }}
               >
-                {s.emoji}
-              </span>
+                <Icon size={13} style={{ color }} strokeWidth={2} />
+              </div>
               <div className="min-w-0">
-                <p className="text-xs font-semibold mb-0.5" style={{ color: s.color }}>
-                  {s.cat}
+                <p className="text-xs font-semibold mb-0.5" style={{ color }}>
+                  {cat}
                 </p>
-                <p className="text-xs leading-relaxed" style={{ color: "#8A96B0" }}>
-                  {s.text}
+                <p className="text-xs leading-snug" style={{ color: "var(--color-txt-2)" }}>
+                  {text}
                 </p>
               </div>
             </div>

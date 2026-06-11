@@ -1,26 +1,33 @@
 import { useEffect, useRef, useState } from "react";
+import {
+  Building2, Plus, ChevronLeft, ChevronRight,
+  Calculator, Calendar, Users, Search, FileText, Briefcase,
+  Wifi, WifiOff, Loader2, Trash2
+} from "lucide-react";
 import { useChat } from "./hooks/useChat";
 import { ChatMessage } from "./components/ChatMessage";
 import { ChatInput } from "./components/ChatInput";
 import { SuggestedQuestions } from "./components/SuggestedQuestions";
 
-// Icône drapeau CI stylisé
-function CIFlag({ size = 32 }: { size?: number }) {
+function CIBadge({ size = 28 }: { size?: number }) {
   return (
     <div
-      className="rounded-xl overflow-hidden flex-shrink-0"
-      style={{ width: size, height: size, boxShadow: "0 2px 8px #00000040" }}
+      style={{
+        width: size, height: size,
+        borderRadius: 7,
+        overflow: "hidden",
+        display: "flex",
+        flexShrink: 0,
+        boxShadow: "0 1px 6px #00000060",
+      }}
     >
-      <div style={{ display: "flex", height: "100%" }}>
-        <div style={{ flex: 1, background: "#E8630A" }} />
-        <div style={{ flex: 1, background: "#FFFFFF" }} />
-        <div style={{ flex: 1, background: "#009A44" }} />
-      </div>
+      <div style={{ flex: 1, background: "#D9580A" }} />
+      <div style={{ flex: 1, background: "#F5F5F0" }} />
+      <div style={{ flex: 1, background: "#0A8A3C" }} />
     </div>
   );
 }
 
-// Badge statut backend
 function StatusBadge() {
   const [status, setStatus] = useState<"checking" | "online" | "offline">("checking");
 
@@ -31,24 +38,39 @@ function StatusBadge() {
       .catch(() => setStatus("offline"));
   }, []);
 
+  if (status === "checking") return null;
+
   return (
-    <div className="flex items-center gap-1.5 text-xs" style={{ color: "#8A96B0" }}>
-      <span
-        className="w-1.5 h-1.5 rounded-full"
-        style={{
-          background: status === "online" ? "#10B981" : status === "offline" ? "#EF4444" : "#F59E0B",
-          boxShadow: status === "online" ? "0 0 6px #10B981" : "none",
-        }}
-      />
-      {status === "online" ? "API connectée" : status === "offline" ? "API hors ligne" : "…"}
+    <div
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+      style={{
+        background: status === "online" ? "#0A8A3C12" : "#DC262612",
+        border: `1px solid ${status === "online" ? "#0A8A3C30" : "#DC262630"}`,
+      }}
+    >
+      {status === "online"
+        ? <Wifi size={11} style={{ color: "#0A8A3C" }} />
+        : <WifiOff size={11} style={{ color: "#DC2626" }} />
+      }
+      <span className="text-xs font-medium" style={{ color: status === "online" ? "#0A8A3C" : "#DC2626" }}>
+        {status === "online" ? "API connectée" : "Hors ligne"}
+      </span>
     </div>
   );
 }
 
+const TOOLS = [
+  { Icon: Calculator, label: "TVA 18 %",           color: "#D9580A" },
+  { Icon: Users,      label: "Cotisations CNPS",    color: "#0A8A3C" },
+  { Icon: Calendar,   label: "Calendrier DGI",      color: "#7C3AED" },
+  { Icon: Search,     label: "Vérification NIF",    color: "#2563EB" },
+  { Icon: FileText,   label: "Régimes fiscaux",     color: "#D97706" },
+];
+
 export default function App() {
   const { messages, isLoading, sendMessage, clearMessages } = useChat();
   const bottomRef = useRef<HTMLDivElement>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const isEmpty = messages.length === 0;
 
   useEffect(() => {
@@ -56,183 +78,222 @@ export default function App() {
   }, [messages, isLoading]);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#080C14" }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--color-bg)" }}>
 
       {/* ── Sidebar ── */}
       <aside
-        className="flex-shrink-0 flex flex-col transition-all duration-300 border-r"
+        className="flex-shrink-0 flex flex-col transition-all duration-200"
         style={{
-          width: sidebarOpen ? "240px" : "56px",
-          borderColor: "#1A2235",
-          background: "#0A0F1B",
+          width: collapsed ? 52 : 220,
+          background: "var(--color-surface)",
+          borderRight: "1px solid var(--color-border)",
         }}
       >
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-3 py-4 border-b" style={{ borderColor: "#1A2235" }}>
-          <CIFlag size={30} />
-          {sidebarOpen && (
-            <div>
-              <p className="text-sm font-bold" style={{ color: "#EEF0F6" }}>eGov CI</p>
-              <p className="text-xs" style={{ color: "#4A5568" }}>Fiscal · CNPS · DGI</p>
+        {/* Logo row */}
+        <div
+          className="flex items-center gap-2.5 px-3 py-3.5"
+          style={{ borderBottom: "1px solid var(--color-border)" }}
+        >
+          <CIBadge size={26} />
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="text-sm font-semibold leading-tight" style={{ color: "var(--color-txt-1)" }}>
+                eGov CI
+              </p>
+              <p className="text-xs leading-tight" style={{ color: "var(--color-txt-3)" }}>
+                Plateforme fiscale
+              </p>
             </div>
           )}
         </div>
 
-        {/* Nouvelle conversation */}
-        <div className="px-2 py-3">
+        {/* New chat */}
+        <div className="px-2 pt-2">
           <button
             onClick={clearMessages}
-            className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-white/5"
-            style={{ color: "#8A96B0" }}
             title="Nouvelle conversation"
+            className="w-full flex items-center gap-2.5 rounded-lg px-2 py-2 transition-colors"
+            style={{ color: "var(--color-txt-2)" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "var(--color-surface-3)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
           >
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            {sidebarOpen && <span>Nouvelle conversation</span>}
+            <Plus size={15} strokeWidth={2} />
+            {!collapsed && <span className="text-xs">Nouvelle conversation</span>}
           </button>
         </div>
 
-        {/* Outils disponibles */}
-        {sidebarOpen && (
-          <div className="px-3 py-2 flex-1">
-            <p className="text-xs font-semibold mb-3" style={{ color: "#2A3550", letterSpacing: "0.08em" }}>
+        {/* Tools list */}
+        <div className="flex-1 px-2 pt-4">
+          {!collapsed && (
+            <p
+              className="text-xs font-semibold mb-2 px-2"
+              style={{ color: "var(--color-txt-3)", letterSpacing: "0.07em" }}
+            >
               OUTILS MCP
             </p>
-            {[
-              { icon: "🧮", name: "TVA 18%",          color: "#E8630A" },
-              { icon: "👥", name: "Cotisations CNPS",  color: "#009A44" },
-              { icon: "📅", name: "Calendrier DGI",    color: "#8B5CF6" },
-              { icon: "🔍", name: "Vérif. NIF",        color: "#3B82F6" },
-              { icon: "📋", name: "Régimes fiscaux",   color: "#F59E0B" },
-            ].map(t => (
-              <div key={t.name} className="flex items-center gap-2 py-1.5">
-                <span className="text-sm">{t.icon}</span>
-                <span className="text-xs" style={{ color: "#4A5568" }}>{t.name}</span>
-                <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: t.color + "80" }} />
-              </div>
-            ))}
-          </div>
-        )}
+          )}
+          {TOOLS.map(({ Icon, label, color }) => (
+            <div
+              key={label}
+              className="flex items-center gap-2.5 rounded-lg px-2 py-1.5"
+              title={label}
+            >
+              <Icon size={14} style={{ color, flexShrink: 0 }} strokeWidth={1.8} />
+              {!collapsed && (
+                <span className="text-xs truncate" style={{ color: "var(--color-txt-2)" }}>
+                  {label}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
 
-        {/* Toggle sidebar */}
+        {/* Collapse toggle */}
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="mt-auto mx-2 mb-4 flex items-center justify-center rounded-lg p-2 transition-colors hover:bg-white/5"
-          style={{ color: "#2A3550" }}
+          onClick={() => setCollapsed(!collapsed)}
+          className="mx-2 mb-3 flex items-center justify-center rounded-lg p-2 transition-colors"
+          style={{ color: "var(--color-txt-3)" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "var(--color-surface-3)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d={sidebarOpen ? "M11 19l-7-7 7-7m8 14l-7-7 7-7" : "M13 5l7 7-7 7M5 5l7 7-7 7"} />
-          </svg>
+          {collapsed
+            ? <ChevronRight size={14} strokeWidth={2} />
+            : <ChevronLeft size={14} strokeWidth={2} />
+          }
         </button>
       </aside>
 
-      {/* ── Zone principale ── */}
+      {/* ── Main ── */}
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Header */}
         <header
-          className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b"
-          style={{ background: "#080C14", borderColor: "#1A2235" }}
+          className="flex-shrink-0 flex items-center justify-between px-5 py-3"
+          style={{
+            background: "var(--color-surface)",
+            borderBottom: "1px solid var(--color-border)",
+          }}
         >
-          <div>
-            <h1 className="text-sm font-semibold" style={{ color: "#EEF0F6" }}>
-              Assistant Fiscal CI
-            </h1>
-            <p className="text-xs" style={{ color: "#4A5568" }}>
-              DGI · CNPS · Régimes fiscaux · Côte d'Ivoire
-            </p>
+          <div className="flex items-center gap-3">
+            <Building2 size={16} style={{ color: "var(--color-txt-3)" }} strokeWidth={1.8} />
+            <div>
+              <h1 className="text-sm font-semibold" style={{ color: "var(--color-txt-1)" }}>
+                Assistant Fiscal — Côte d'Ivoire
+              </h1>
+              <p className="text-xs" style={{ color: "var(--color-txt-3)" }}>
+                DGI · CNPS · CGI 2024
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-3">
             <StatusBadge />
             {!isEmpty && (
               <button
                 onClick={clearMessages}
-                className="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-white/5"
-                style={{ color: "#4A5568", borderColor: "#1A2235" }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors"
+                style={{
+                  color: "var(--color-txt-2)",
+                  border: "1px solid var(--color-border)",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "var(--color-surface-3)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
               >
+                <Trash2 size={12} strokeWidth={2} />
                 Effacer
               </button>
             )}
           </div>
         </header>
 
-        {/* Messages */}
+        {/* Messages area */}
         <main className="flex-1 overflow-y-auto">
           {isEmpty ? (
-            /* ─ Écran d'accueil ─ */
-            <div className="h-full flex flex-col items-center justify-center px-4 py-12">
-              {/* Visual CI */}
-              <div className="relative mb-8">
-                <div
-                  className="w-20 h-20 rounded-3xl overflow-hidden"
-                  style={{ boxShadow: "0 0 60px #E8630A20, 0 0 30px #009A4420" }}
-                >
-                  <div style={{ display: "flex", height: "100%" }}>
-                    <div style={{ flex: 1, background: "linear-gradient(180deg, #E8630A, #FF7A20)" }} />
-                    <div style={{ flex: 1, background: "#FFFFFF" }} />
-                    <div style={{ flex: 1, background: "linear-gradient(180deg, #009A44, #00C85A)" }} />
-                  </div>
-                </div>
-                {/* Halo subtil */}
-                <div
-                  className="absolute inset-0 rounded-3xl -z-10"
-                  style={{
-                    background: "radial-gradient(circle, #E8630A10 0%, transparent 70%)",
-                    transform: "scale(1.8)",
-                  }}
-                />
-              </div>
-
-              <h2 className="text-2xl font-bold mb-2 text-center" style={{ color: "#EEF0F6" }}>
-                Bonjour, je suis votre assistant fiscal
-              </h2>
-              <p className="text-sm text-center max-w-md mb-2" style={{ color: "#8A96B0", lineHeight: 1.6 }}>
-                Posez vos questions en français ou en anglais sur la fiscalité ivoirienne.
-              </p>
-              <p className="text-xs text-center mb-10" style={{ color: "#2A3550" }}>
-                TVA · CNPS · Calendrier DGI · NIF · Régimes fiscaux
-              </p>
-
-              <SuggestedQuestions onSelect={sendMessage} />
-            </div>
+            <WelcomeScreen onSelect={sendMessage} />
           ) : (
-            /* ─ Conversation ─ */
-            <div className="max-w-3xl mx-auto px-4 py-6 flex flex-col gap-5">
+            <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-4">
               {messages.map(msg => (
                 <ChatMessage key={msg.id} message={msg} />
               ))}
 
-              {/* Typing indicator */}
-              {isLoading && (
-                <div className="animate-fade-up flex gap-3">
-                  <div
-                    className="w-8 h-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0 mt-1"
-                    style={{ background: "linear-gradient(135deg, #009A44, #00C85A)" }}
-                  >
-                    🏛️
-                  </div>
-                  <div>
-                    <p className="text-xs mb-1.5 px-1" style={{ color: "#009A44" }}>Assistant eGov CI</p>
-                    <div
-                      className="rounded-2xl rounded-tl-sm px-5 py-4 flex items-center gap-1.5"
-                      style={{ background: "#0F1623", border: "1px solid #1A2235" }}
-                    >
-                      <div className="typing-dot" />
-                      <div className="typing-dot" />
-                      <div className="typing-dot" />
-                    </div>
-                  </div>
-                </div>
-              )}
+              {isLoading && <TypingIndicator />}
+
               <div ref={bottomRef} />
             </div>
           )}
         </main>
 
-        {/* Input */}
         <ChatInput onSend={sendMessage} disabled={isLoading} />
+      </div>
+    </div>
+  );
+}
+
+function WelcomeScreen({ onSelect }: { onSelect: (q: string) => void }) {
+  return (
+    <div className="h-full flex flex-col items-center justify-center px-4 py-12">
+      {/* Hero mark */}
+      <div className="relative mb-8 flex items-center justify-center">
+        <div
+          style={{
+            width: 64, height: 64,
+            borderRadius: 18,
+            overflow: "hidden",
+            display: "flex",
+            boxShadow: "0 0 0 1px #D9580A20, 0 8px 32px #00000060",
+          }}
+        >
+          <div style={{ flex: 1, background: "#D9580A" }} />
+          <div style={{ flex: 1, background: "#F5F5F0" }} />
+          <div style={{ flex: 1, background: "#0A8A3C" }} />
+        </div>
+        {/* glow */}
+        <div
+          style={{
+            position: "absolute", inset: -20,
+            background: "radial-gradient(circle, #D9580A08 0%, transparent 70%)",
+            pointerEvents: "none",
+          }}
+        />
+      </div>
+
+      <h2
+        className="text-xl font-semibold text-center mb-2"
+        style={{ color: "var(--color-txt-1)", letterSpacing: "-0.01em" }}
+      >
+        Bonjour, je suis votre assistant fiscal
+      </h2>
+      <p
+        className="text-sm text-center max-w-sm mb-1"
+        style={{ color: "var(--color-txt-2)", lineHeight: 1.65 }}
+      >
+        Posez vos questions en français ou en anglais sur la fiscalité ivoirienne.
+      </p>
+      <p className="text-xs text-center mb-10" style={{ color: "var(--color-txt-3)" }}>
+        Données DGI, CNPS et CGI 2024 · 5 outils MCP disponibles
+      </p>
+
+      <SuggestedQuestions onSelect={onSelect} />
+    </div>
+  );
+}
+
+function TypingIndicator() {
+  return (
+    <div className="msg-enter flex gap-3">
+      <div
+        className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+        style={{ background: "var(--color-surface-3)", border: "1px solid var(--color-border)" }}
+      >
+        <Building2 size={13} style={{ color: "var(--color-txt-3)" }} strokeWidth={1.8} />
+      </div>
+      <div
+        className="rounded-xl rounded-tl-sm px-4 py-3 flex items-center gap-1"
+        style={{ background: "var(--color-surface-2)", border: "1px solid var(--color-border)" }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full dot-1" style={{ background: "var(--color-txt-3)", display: "block" }} />
+        <span className="w-1.5 h-1.5 rounded-full dot-2" style={{ background: "var(--color-txt-3)", display: "block" }} />
+        <span className="w-1.5 h-1.5 rounded-full dot-3" style={{ background: "var(--color-txt-3)", display: "block" }} />
       </div>
     </div>
   );
