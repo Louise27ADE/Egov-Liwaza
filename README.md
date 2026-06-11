@@ -1,11 +1,10 @@
 ---
 title: Egov Liwaza Backend
-emoji: 🏛️
+emoji: 🌍
 colorFrom: green
 colorTo: orange
 sdk: docker
 pinned: false
-app_port: 7860
 ---
 
 # eGov CI — Plateforme Fiscale Intelligente
