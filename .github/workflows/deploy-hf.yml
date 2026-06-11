@@ -1,0 +1,72 @@
+name: Deploy to HuggingFace Spaces
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'Dockerfile'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Setup Git
+        run: |
+          git config --global user.email "adelouiseshola@gmail.com"
+          git config --global user.name "Louise ADEDOKUN"
+
+      - name: Push to HuggingFace Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # Créer un dossier temporaire avec uniquement les fichiers backend
+          mkdir hf-deploy
+          cd hf-deploy
+          git init
+          git config user.email "adelouiseshola@gmail.com"
+          git config user.name "Louise ADEDOKUN"
+
+          # Créer le README avec frontmatter HuggingFace
+          cat > README.md << 'EOF'
+          ---
+          title: Egov Liwaza Backend
+          emoji: 🌍
+          colorFrom: green
+          colorTo: orange
+          sdk: docker
+          pinned: false
+          ---
+
+          # eGov CI - Backend MCP Server
+
+          API fiscale pour la Cote d Ivoire - Louise ADEDOKUN
+          EOF
+
+          # Créer le Dockerfile pour HF (port 7860)
+          cat > Dockerfile << 'EOF'
+          FROM python:3.12-slim
+          WORKDIR /app
+          COPY backend/requirements.txt .
+          RUN pip install --no-cache-dir -r requirements.txt
+          COPY backend/app ./app
+          RUN useradd -m -u 1000 appuser
+          USER appuser
+          EXPOSE 7860
+          CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
+          EOF
+
+          # Copier le code backend
+          cp -r $GITHUB_WORKSPACE/backend ./backend
+
+          # Commit et push vers HF
+          git add .
+          git commit -m "deploy: update backend from GitHub Actions"
+          git remote add origin https://louisehuggingface:${HF_TOKEN}@huggingface.co/spaces/louisehuggingface/egov-liwaza-backend
+          git push origin main --force
