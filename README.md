@@ -7,9 +7,9 @@ sdk: docker
 pinned: false
 ---
 
-# eGov CI â€” Plateforme Fiscale Intelligente
+# eGov CI ” Plateforme Fiscale Intelligente
 
-> Plateforme eGov alimentÃ©e par l'IA, permettant aux entreprises et citoyens de CÃ´te d'Ivoire d'interagir avec les services fiscaux en langage naturel.
+> Plateforme eGov alimentée par l'IA, permettant aux entreprises et citoyens de Cote d'Ivoire d'interagir avec les services fiscaux en langage naturel.
 
 **Auteure :** Louise ADEDOKUN  
 **Stack :** Python Â· FastAPI Â· MCP Â· React Â· TypeScript Â· Tailwind Â· Google Gemini 2.5 Flash Lite  
@@ -17,17 +17,17 @@ pinned: false
 
 ---
 
-## AperÃ§u du produit
+## Aperçu du produit
 
-L'utilisateur pose une question en franÃ§ais ou en anglais :
+L'utilisateur pose une question en français ou en anglais :
 
 > *"Calcule la TVA sur 500 000 FCFA pour une vente"*
 
 L'assistant :
-1. Comprend la requÃªte grÃ¢ce Ã  Claude
-2. Identifie l'outil MCP appropriÃ© (`outil_calcul_tva`)
-3. ExÃ©cute l'outil sur le MCP Server (backend Python)
-4. Retourne un rÃ©sultat structurÃ© et clair
+1. Comprend la requète grace à  Claude
+2. Identifie l'outil MCP approprié (`outil_calcul_tva`)
+3. Exécute l'outil sur le MCP Server (backend Python)
+4. Retourne un résultat structuré et clair
 
 ---
 
@@ -55,12 +55,12 @@ Python MCP Server (FastAPI)
 
 ## Installation locale
 
-### PrÃ©requis
+### Prérequis
 - Python 3.12+
 - Node.js 20+
-- Une clÃ© API Anthropic (https://console.anthropic.com)
+- Une clé API Anthropic (https://console.anthropic.com)
 
-### 1. Cloner le dÃ©pÃ´t
+### 1. Cloner le dépot
 ```bash
 git clone https://github.com/VOTRE_USERNAME/egov-liwaza.git
 cd egov-liwaza
@@ -70,7 +70,7 @@ cd egov-liwaza
 ```bash
 cd backend
 cp .env.example .env
-# Ã‰ditez .env et ajoutez votre ANTHROPIC_API_KEY
+# éditez .env et ajoutez votre ANTHROPIC_API_KEY
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
@@ -79,7 +79,7 @@ uvicorn app.main:app --reload --port 8000
 ```bash
 cd frontend
 cp ../.env.example .env.local
-# Ã‰ditez .env.local et ajoutez votre VITE_ANTHROPIC_API_KEY
+# éditez .env.local et ajoutez votre VITE_ANTHROPIC_API_KEY
 npm install
 npm run dev
 ```
@@ -89,7 +89,7 @@ Ouvrez http://localhost:3000
 ### Avec Docker (option recommandÃ©e)
 ```bash
 cp .env.example .env
-# Ã‰ditez .env
+# éditez .env
 docker-compose up --build
 ```
 
@@ -138,9 +138,9 @@ egov-liwaza/                    â† Monorepo
 
 ## Endpoints API
 
-| MÃ©thode | URL | Description |
+| Méthode | URL | Description |
 |---------|-----|-------------|
-| GET | `/health` | Ã‰tat du serveur |
+| GET | `/health` | état du serveur |
 | GET | `/docs` | Documentation Swagger |
 | `*` | `/mcp/*` | Protocole MCP (SSE) |
 
@@ -149,28 +149,28 @@ egov-liwaza/                    â† Monorepo
 ## DÃ©ploiement
 
 ### Backend â€” Render
-1. Connecter le repo GitHub Ã  Render
+1. Connecter le repo GitHub à  Render
 2. CrÃ©er un "Web Service" â†’ pointer vers `backend/`
 3. Build command : `pip install -r requirements.txt`
 4. Start command : `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 5. Ajouter les variables d'environnement dans le dashboard Render
 
 ### Frontend â€” Vercel
-1. Connecter le repo GitHub Ã  Vercel
+1. Connecter le repo GitHub a  Vercel
 2. Root directory : `frontend`
 3. Build command : `npm run build`
 4. Ajouter `VITE_ANTHROPIC_API_KEY` et `VITE_MCP_URL` dans les settings Vercel
 
 ---
 
-## HypothÃ¨ses et compromis
+## Hypothèses et compromis
 
-**HypothÃ¨ses :**
-- Les donnÃ©es fiscales (taux TVA 18%, barÃ¨mes CNPS) sont stables sur la durÃ©e du test
+**Hypothèses :**
+- Les données fiscales (taux TVA 18%, barÃ¨mes CNPS) sont stables sur la durée du test
 - Le NIF ivoirien suit un format standardisÃ© DGI
 
 **Compromis :**
-- La clÃ© Anthropic est utilisÃ©e cÃ´tÃ© frontend (dangerouslyAllowBrowser) pour la simplicitÃ© du dÃ©mo â€” en production, il faudrait un proxy backend
+- La clé Anthropic est utilisée cÃ´tÃ© frontend (dangerouslyAllowBrowser) pour la simplicitÃ© du dÃ©mo â€” en production, il faudrait un proxy backend
 - Pas de persistance des conversations (localStorage possible comme amÃ©lioration)
 
 **AmÃ©liorations futures :**
